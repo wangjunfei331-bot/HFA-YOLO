@@ -1,0 +1,19 @@
+
+# 注意：下载的UAVDT数据集是训练集和验证集分开的
+# 我们需要将文件夹做成如下格式才可在模型中训练
+#dataset_UAVDT
+#——images
+#————train
+#————val
+#——labels
+#————train
+#————val
+
+path: /root/autodl-tmp/UAVDT
+train: UAVDT_train/images
+val: UAVDT_val/images
+#test: D:\\1\\dataset_UAVDT\\images\\test
+
+nc: 3
+
+names: ['car', 'truck', 'bus']

@@ -16,7 +16,7 @@ from ultralytics.utils.torch_utils import autocast
 
 from .metrics import bbox_iou, probiou
 from .tal import bbox2dist, rbox2dist
-from .iou import IouLoss
+
 
 class VarifocalLoss(nn.Module):
     """Varifocal loss by Zhang et al.
@@ -113,7 +113,7 @@ class BboxLoss(nn.Module):
         """Initialize the BboxLoss module with regularization maximum and DFL settings."""
         super().__init__()
         self.dfl_loss = DFLoss(reg_max) if reg_max > 1 else None
-        self.wiou_loss = IouLoss(ltype='WIoU', monotonous=False)
+
     def forward(
         self,
         pred_dist: torch.Tensor,
@@ -128,8 +128,8 @@ class BboxLoss(nn.Module):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Compute IoU and DFL losses for bounding boxes."""
         weight = target_scores.sum(-1)[fg_mask].unsqueeze(-1)
-        loss_iou = self.wiou_loss(pred_bboxes[fg_mask], target_bboxes[fg_mask])
-        loss_iou = (loss_iou * weight).sum() / target_scores_sum
+        iou = bbox_iou(pred_bboxes[fg_mask], target_bboxes[fg_mask], xywh=False, CIoU=True)
+        loss_iou = ((1.0 - iou) * weight).sum() / target_scores_sum
 
         # DFL loss
         if self.dfl_loss:
@@ -1007,7 +1007,7 @@ class v8OBBLoss(v8DetectionLoss):
             raise TypeError(
                 "ERROR ❌ OBB dataset incorrectly formatted or not a OBB dataset.\n"
                 "This error can occur when incorrectly training a 'OBB' model on a 'detect' dataset, "
-                "i.e. 'yolo train model=yolo11n-obb.pt data=dota8.yaml'.\nVerify your dataset is a "
+                "i.e. 'yolo train model=yolo26n-obb.pt data=dota8.yaml'.\nVerify your dataset is a "
                 "correctly formatted 'OBB' dataset using 'data=dota8.yaml' "
                 "as an example.\nSee https://docs.ultralytics.com/datasets/obb/ for help."
             ) from e
